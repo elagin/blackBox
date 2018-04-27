@@ -8,6 +8,7 @@
 #include <RtcDS1307.h>
 #include <Adafruit_BMP085.h>
 #include "DHT.h"
+#include <MsTimer2.h>
 
 #define DHTPIN 4 // номер пина, к которому подсоединен датчик
 
@@ -96,36 +97,133 @@ void setup ()
   // just clear them to your needed state
   Rtc.SetSquareWavePin(DS1307SquareWaveOut_Low);
 
-  //sensors.begin();/* Inizialisieren der Dallas Temperature library */
   Serial.println("pressure, pressTemperature, altitude, humidity");
+
+  //flash();
+  //MsTimer2::set(1000, flash);
+  //MsTimer2::start();
+
+  //MsTimer2::stop();
+
+  //sensors.begin();/* Inizialisieren der Dallas Temperature library */
+
   //adresseAusgeben(); /* Adresse der Devices ausgeben */
 }
 
+int maxIter = 10;
+int humidityRate = 6;
+int temperatureRate = 2;
+int iter = 0;
+
+/*
+  void flash()
+  {
+  MsTimer2::stop();
+
+  Serial.println("FLASH");
+  if (iter % humidityRate == 0)
+  {
+    //Console.Out.WriteLine("humidityRate");
+    Serial.println("humidityRate");
+    //getHumidity();
+    //humidityRate = 0;
+  }
+  if (iter % temperatureRate == 0)
+  {
+    //Console.Out.WriteLine("temperatureRate");
+    Serial.println("temperatureRate");
+    //pressTemperature =  bmp.readTemperature();
+    //temperatureRate = 0;
+  }
+
+  //getPressure();
+
+  if (iter > maxIter)
+  {
+    //Console.Out.WriteLine("maxIter");
+    Serial.println("maxIter");
+    iter = 0;
+    //return;
+  }
+  else
+  {
+    Serial.println("iter++");
+    iter++;
+  }
+  MsTimer2::set(1000, flash);
+  MsTimer2::start();
+  }
+*/
+
 void loop ()
 {
-  if (!Rtc.IsDateTimeValid())
+  RtcDateTime now = Rtc.GetDateTime();
+  //Serial.println("  ---=== FLASH ===---");
+  
+  if (iter % humidityRate == 0)
   {
+    //Console.Out.WriteLine("humidityRate");
+    //Serial.println("humidityRate");
+    getHumidity();
+    //humidityRate = 0;
+  }
+  if (iter % temperatureRate == 0)
+  {
+    //Console.Out.WriteLine("temperatureRate");
+    //Serial.println("temperatureRate and pressure");
+    pressTemperature =  bmp.readTemperature();
+    getPressure();
+    //temperatureRate = 0;
+  }
+
+  //getPressure();
+
+  if (iter > maxIter)
+  {
+    //Console.Out.WriteLine("maxIter");
+    //Serial.println("maxIter");
+    iter = 0;
+    //return;
+  }
+  else
+  {
+    //Serial.println("iter++");
+    iter++;
+  }
+  printData(now);  
+  delay(1000);
+}
+
+void loopOld ()
+{
+  /*
+    if (!Rtc.IsDateTimeValid())
+    {
     // Common Cuases:
     //    1) the battery on the device is low or even missing and the power line was disconnected
     Serial.println("RTC lost confidence in the DateTime!");
-  }
+    }
 
-  RtcDateTime now = Rtc.GetDateTime();
-  getPressure();
-  getHumidity();
-  //sensors.requestTemperatures(); // Temp abfragen
-  //temperature = sensors.getTempCByIndex(0);
-  //Serial.print(sensors.getTempCByIndex(0) );
-  //Serial.print(" Grad Celsius");
-  printData(now);
-  Serial.println();
+    RtcDateTime now = Rtc.GetDateTime();
+    //getPressure();
 
-  //delay(1000*10); // ten seconds
-  int it = 0;
-  do {
-    delay(2000 * 1);
-    it++;
-  } while (it < 30);
+    //getHumidity();
+    //sensors.requestTemperatures(); // Temp abfragen
+    //temperature = sensors.getTempCByIndex(0);
+    //Serial.print(sensors.getTempCByIndex(0) );
+    //Serial.print(" Grad Celsius");
+
+    printData(now);
+    Serial.println();
+
+    //delay(1000*10); // ten seconds
+    //int it = 0;
+    //do {
+    //delay(1000 * 1);
+    delay(1000);
+    //it++;
+    //} while (it < 30);
+  */
 }
 /*
   void adresseAusgeben() {
@@ -158,6 +256,7 @@ void loop ()
   return;
   }
 */
+
 void printData(const RtcDateTime& dt)
 {
   char datestring[40];
@@ -174,6 +273,7 @@ void printData(const RtcDateTime& dt)
   Serial.print(";");
   Serial.print(datestring);
   Serial.print(";");
+
   /*
     snprintf_P(datestring,
                countof(datestring),
@@ -183,9 +283,10 @@ void printData(const RtcDateTime& dt)
                altitude );
     Serial.print(datestring);
   */
-  //Serial.print(temperature);
-  char buf[40];
 
+  //  Serial.print(temperature);
+
+  char buf[40];
   sprintf(buf, "%02d", pressure);
   char bufFloat[40];
   Serial.print(buf);
@@ -197,18 +298,21 @@ void printData(const RtcDateTime& dt)
   dtostrf(altitude, 2, n, bufFloat);
   Serial.print(";");
   Serial.print(bufFloat);
+
   /*
     dtostrf(temperature, 2, n, bufFloat);
     Serial.print(";");
     Serial.print(bufFloat);
   */
+
   Serial.print(";");
   Serial.print(humidity);
+  Serial.println(";");
 }
 
 void getPressure()
 {
-  pressTemperature =  bmp.readTemperature();
+  //  pressTemperature =  bmp.readTemperature();
   pressure =  bmp.readPressure() / 133.3224;
   altitude = bmp.readAltitude();
 }
