@@ -4,6 +4,7 @@ import inspect
 import logging
 import datetime
 from datetime import datetime
+#from serial import serial
 
 #with open('/home/pi/dev/navi/Fusion.text', 'a') as file:
 #        file.write('OK!\r\n')
@@ -25,7 +26,8 @@ def function_logger(file_level, console_level = None):
         logger.addHandler(ch)
 
     #fh = logging.FileHandler("{0}.log".format(function_name))
-    fh = logging.FileHandler("/home/pi/dev/navi/one.log".format(function_name))
+    #fh = logging.FileHandler("/home/pi/dev/navi/one.log".format(function_name))
+    fh = logging.FileHandler("one.log".format(function_name))
     fh.setLevel(file_level)
     fh_format = logging.Formatter('%(asctime)s - %(lineno)d - %(levelname)-8s - %(message)s')
     fh.setFormatter(fh_format)
