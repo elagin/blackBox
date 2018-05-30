@@ -15,7 +15,7 @@ def getGPXHeader():
 	end = '</trk> </gpx>'
 	segStart = '<trkseg>'
 	return xmlHeader + gpxHeader + meta + start + segStart 
-	
+
 def getGPXEnder():
 	segEnd = '</trkseg>\r</trk>\r</gpx>'
 	return segEnd
@@ -27,9 +27,7 @@ def getGPXPoint(line):
 		time = getTime(msg)
 		if msg.latitude > 0 or msg.longitude > 0:
 			#if 'writeName' in globals():
-			trkptStart = '\r\t<trkpt lat="' + str(msg.latitude) + '" lon="' + str(msg.longitude) + '">'
-			#trkptTime = '\r\t<time>2011-09-22T18:56:51Z</time>'
-			#trkptTime = getTime(msg)
+			trkptStart = '\r<trkpt lat="' + str(msg.latitude) + '" lon="' + str(msg.longitude) + '">'
 			trkptEnd = '\r</trkpt>'
 			res = trkptStart + time
 			if hasattr(msg, 'num_sats'):
@@ -38,9 +36,15 @@ def getGPXPoint(line):
 			if hasattr(msg, 'altitude'):
 				ele = '\r\t<ele>' + str(msg.altitude) + '</ele>'
 				res = res + ele
+				
+			if hasattr(msg, 'spd_over_grnd'):
+				speed = '\r\t<speed>' + str(msg.spd_over_grnd) + '</speed>'
+				res = res + speed
+
+			if hasattr(msg, 'true_course'):
+				course = '\r\t<course>' + str(msg.true_course) + '</course>'
+				res = res + course
 			#ele = '\r\t<ele>' + str(msg.altitude) + '</ele>'
-			#res = res + sats
-			#res = res + ele
 			res = res + trkptEnd
 			#+ sats + ele + trkptEnd
 			return str(res)
