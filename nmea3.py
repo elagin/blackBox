@@ -25,16 +25,25 @@ def getGPXPoint(line):
 	msg = pynmea2.parse(line)
 	try:
 		time = getTime(msg)
-		#if 'writeName' in globals():
-		trkptStart = '\r\t<trkpt lat="' + str(msg.latitude) + '" lon="' + str(msg.longitude) + '">'
-		#trkptTime = '\r\t<time>2011-09-22T18:56:51Z</time>'
-		#trkptTime = getTime(msg)
-		trkptEnd = '\r</trkpt>'
-		#sats = '\r\t<sat>' + str(msg.num_sats) + '</sat>'
-		#ele = '\r\t<ele>' + str(msg.altitude) + '</ele>'
-		res = trkptStart + time + trkptEnd
-		#+ sats + ele + trkptEnd
-		return str(res)
+		if msg.latitude > 0 or msg.longitude > 0:
+			#if 'writeName' in globals():
+			trkptStart = '\r\t<trkpt lat="' + str(msg.latitude) + '" lon="' + str(msg.longitude) + '">'
+			#trkptTime = '\r\t<time>2011-09-22T18:56:51Z</time>'
+			#trkptTime = getTime(msg)
+			trkptEnd = '\r</trkpt>'
+			res = trkptStart + time
+			if hasattr(msg, 'num_sats'):
+				sats = '\r\t<sat>' + str(msg.num_sats) + '</sat>'
+				res = res + sats
+			if hasattr(msg, 'altitude'):
+				ele = '\r\t<ele>' + str(msg.altitude) + '</ele>'
+				res = res + ele
+			#ele = '\r\t<ele>' + str(msg.altitude) + '</ele>'
+			#res = res + sats
+			#res = res + ele
+			res = res + trkptEnd
+			#+ sats + ele + trkptEnd
+			return str(res)
 	except AttributeError as error:
 		print 'Attribute'
 	return str('')
